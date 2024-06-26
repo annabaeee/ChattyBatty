@@ -2,27 +2,140 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Agent Chat</title>
+    <title>Chatty Batty</title>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <link rel="stylesheet" href="style.css">
     <style>
-        .message {
-            margin-bottom: 10px;
-        }
-        #chat {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 10px;
-        }
+        /* General Styling */
+body {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #1a1a1a;
+    color: #ffffff;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    font-family: 'Lucida Console', Monaco, monospace;
+    color: #ff66cc;
+    text-shadow: 1px 1px 2px #000000;
+    text-align: center;
+}
+
+/* Chat Container */
+#chat {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 2px solid #ff66cc;
+    padding: 10px;
+    background-color: #333333;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+/* Messages */
+.message {
+    margin-bottom: 10px;
+    padding: 5px;
+    background-color: #444444;
+    border-left: 5px solid #ff66cc;
+    border-radius: 5px;
+}
+
+.profile-pic {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.name-label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+/* Input and Button */
+input[type="text"] {
+    width: calc(100% - 120px);
+    padding: 10px;
+    border: 2px solid #ff66cc;
+    border-radius: 5px;
+    background-color: #222222;
+    color: #ffffff;
+    margin-right: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #ff66cc;
+    border: none;
+    border-radius: 5px;
+    color: #ffffff;
+    font-family: 'Lucida Console', Monaco, monospace;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #ff3399;
+}
+
+/* Bat background */
+
+body::after {
+    content: '';
+    background: url('https://i.pinimg.com/474x/59/68/5b/59685b58f6bcb181f4bc96cd27a497cd.jpg') repeat;
+    opacity: 0.1;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    position: fixed;
+    z-index: -1;
+}
+
     </style>
 </head>
 <body>
-    <h1>Chat with Agents</h1>
+    <h1>Chit chat with some bats!</h1>
     <div id="chat"></div>
     <input type="text" id="topic_input" placeholder="Enter a topic..." autocomplete="off"/>
     <button onclick="startConversation()">Start Conversation</button>
 
     <script>
+        const agentsConfig = [
+            {
+                name: "Painted Bat",
+                color: "#ff66cc",
+                image: "https://images.hindustantimes.com/img/2023/01/19/1600x900/The-orange-coloured-bat-spotted-in-Chhattisgarh-ea_1674107032378.jpg"
+            },
+            {
+                name: "Honduran White Bat",
+                color: "#66ff66",
+                image: "https://www.rainforest-alliance.org/wp-content/uploads/2021/06/Ectophylla_alba_in_hand-1.jpg.optimal.jpg"
+            },
+            {
+                name: "Pipistrelle",
+                color: "#ff9933",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTE5xV7_y-o0aRGJnLZ1nzawlIthp9Ydc6Zqg&s"
+            },
+            {
+                name: "Black Flying Fox",
+                color: "#ff3333",
+                image: "https://i.pinimg.com/originals/da/3a/18/da3a184e870cb40a8a6db4362164953c.jpg"
+            },
+            {
+                name: "Vampire Bat",
+                color: "#9933ff",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcScQSQz1T6OM7dCFrxfzChJ5U6sX3cMqG0zLA&s"
+            },
+            {
+                name: "Tent-making Bat",
+                color: "#33ccff",
+                image: "https://thenighttour.com/alien2/drake_bay_tent_bat5.jpg"
+            }
+        ];
+
         var socket = io.connect('http://127.0.0.1:5000');
         var currentMessageContainer = null;
         var currentRole = null;
